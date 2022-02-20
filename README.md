@@ -8,23 +8,23 @@ Use this only on accounts you own.
 
 
 ### DOWNLOAD ###
-1. Clone this git directory.
-	git clone "https://github.com/shahfahad50951/nordvpn-checker.git"
+1. Clone this git directory.\
+	Command: git clone "https://github.com/shahfahad50951/nordvpn-checker.git"
 
 
 ### COMPILE ###
-1. Change current working directory to nordvpn-checker directory.
+1. Change current working directory to nordvpn-checker directory.\
 	cd ./nordvpn-checker
 
-2. Compile the program on you unix System.
+2. Compile the program on you unix System.\
 	g++ ./nordvpn-checker.cpp -o ./nordvpn-checker
 
-3. Make the Script script.sh executable.
+3. Make the Script script.sh executable\
 	chmod u+x ./script.sh
 
 
 ### USE ###
-1. Run the program.
+1. Run the program.\
 	./nordvpn-checker -i {inputfile_path} -o {outputfile_path}
 
 
