@@ -128,9 +128,10 @@ void parseCombo(const string& combo, string& username, string& password)
     password = combo.substr(delimPos+1, string::npos);
 
     #ifdef __DEBUG
+	int length{strlen(password.c_str())};
         cerr << "[DEBUG]: Password: " << password << '\n';
-	cerr << "[DEBUG]: Length of Password: " << strlen(password.c_str()) << '\n';
-	cerr << "[DEBUG]: Ascii Value of Last Character in Password: " << (int)password[8] << '\n';
+	cerr << "[DEBUG]: Length of Password: " << length << '\n';
+	cerr << "[DEBUG]: Ascii Value of Last Character in Password: " << (int)password[length-1] << '\n';
     #endif
 
     return ;
