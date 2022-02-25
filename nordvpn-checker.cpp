@@ -7,21 +7,24 @@
 
 //#define __DEBUG
 #define TEMPFILE ".tempfile.txt"
-#define SCRIPT "./script.sh"
+#define CHECK_SCRIPT "./check_script.sh"
+#define SWITCH_SCRIPT "./switch_script.sh"
 #define BUFLEN 50
-#define LIMIT 100
+#define LIMIT 500
 #define STATUS_SUCCESS 0
 #define STATUS_FAILURE 1
 #define STATUS_API_REFUSED 2
+#define TOTAL_SERVERS 20
 using namespace std;
 
 void parseCombo(const string& combo, string& username, string& password);
 int checkStatus(void);
 string getExpiry(void);
+bool changeAccount(int nextServerNum, int currServerNum);
 
 int main(int argc, char* argv[])
 {
-    if(argc != 5)
+    if(argc != 5 && argc != 7)
     {
 
         cerr << "[ERROR]: nord-checker: Invalid Number of Arguments\nUsage: " << "./nordchecker -f {input_file_path} -o {output_file_path}\n";
@@ -55,11 +58,29 @@ int main(int argc, char* argv[])
 
     string combo, username, password;
 
-    int count{1};
+    int count{1}, nextServerNum{2}, currServerNum{1};
+
+    if(argc == 7)
+    {
+	    int i = std::stoi(argv[6]);
+	    if(i >= 1)
+	    {
+		    currServerNum = i;
+		    nextServerNum = i+1;
+	    }
+    }
+		    
+    bool checkback{false};
+
     while(count <= LIMIT && !ifile.eof())
     {
-        getline(ifile, combo);
-        parseCombo(combo, username, password);
+	if(!checkback)
+	{
+		getline(ifile, combo);
+        	parseCombo(combo, username, password);
+	}
+	else
+		checkback = false;
 
         pid_t rpid = fork();
         if(rpid == -1)
@@ -70,7 +91,7 @@ int main(int argc, char* argv[])
 
         if(rpid == 0)
         {
-            int ret = execlp(SCRIPT, SCRIPT, username.c_str(), password.c_str(), nullptr);
+            int ret = execlp(CHECK_SCRIPT, CHECK_SCRIPT, username.c_str(), password.c_str(), nullptr);
             if(ret == -1)
             {
                 perror("[ERROR]: nordvpn-checker: execlp");
@@ -99,7 +120,27 @@ int main(int argc, char* argv[])
         else if(status == STATUS_API_REFUSED)
         {
             cout << "\t[FAILURE]:\t[API REFUSED TO SERVE REQUEST]\n";
-	    return -1;
+	    checkback = true;
+
+	    if(nextServerNum > TOTAL_SERVERS)
+		    nextServerNum = 1;
+
+	    if(currServerNum > TOTAL_SERVERS)
+		    currServerNum = 1;
+
+	    bool ret = changeAccount(nextServerNum, currServerNum);
+	    	if(!ret)
+		{
+			cout << "[ERROR]: Not Able to Switch NordAccount After API Ban\n";
+			return -1;
+		}
+		else
+		{
+			cout << "Switched Your Openvpn Server to server Number: " << nextServerNum << '\n';
+			nextServerNum++;
+			currServerNum++;
+			sleep(10);
+		}
         }
 	else
 	{
@@ -110,6 +151,7 @@ int main(int argc, char* argv[])
     }
 
 
+    changeAccount(0, currServerNum);
     ofile.close();
     ifile.close();
     
@@ -176,4 +218,39 @@ string getExpiry(void)
     }
     
     return line;
+}
+
+bool changeAccount(int nextServerNum, int currServerNum)
+{
+	int status;
+	string nextServerNumString;
+	if(nextServerNum != 0)
+		nextServerNumString = std::to_string(nextServerNum);
+	string currServerNumString;
+	if(currServerNum != 0)
+		currServerNumString = std::to_string(currServerNum);
+
+
+	pid_t rpid = fork();
+	if(rpid == -1)
+	{
+		perror("changeAccount: fork");
+		return false;
+	}
+	else if(rpid == 0)
+	{
+		int ret = execlp(SWITCH_SCRIPT, SWITCH_SCRIPT, nextServerNumString.c_str(), currServerNumString.c_str(), nullptr);
+		if(ret == -1)
+		{
+			perror("changeAccount: execlp");
+			exit(-1);
+		}
+	}
+
+	pid_t cpid = wait(&status);
+
+	if(WIFEXITED(status) && (WEXITSTATUS(status) == 0))
+		return true;
+
+	return false;
 }
