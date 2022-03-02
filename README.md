@@ -12,6 +12,25 @@ Use this only on accounts you own.
 	Command: git clone "https://github.com/shahfahad50951/nordvpn-checker.git"
 
 
+
+### PRECOMPILATION STEPS ###
+1. First thing first, install openvpn package from your distribution, system must be booted with systemd.\
+	This program will switch your openvpn server automatically when banned.
+2. Download the openvpn config files (different file for different nordvpn servers) from the nordvpn website.  
+3. Rename your openvpn config files downloaded from nordvpn website as 1.conf, 2.conf and so on.
+4. Now place all these openvpn config files in the directory /etc/openvpn/
+5. Now place the login credentials for nordvpn openvpn servers, downloaded from your nordvpn accounts, into files named auth1.txt, auth2.txt and so on.\
+	There should be 2 lines in each authN.txt file. First line should contain the username and second line should contain password.
+6. Now place all these files i.e auth1.txt, auth2.txt and so on, into the directory /etc/openvpn/.
+7. Now edit each openvpn config file in the /etc/openvpn directory i.e 1.conf, 2.conf and so on, and search for a line containing "auth-user-pass".
+8. Edit this line, and append the path of the file containing the nordvpn openvpn credentials, like "auth-user-pass /etc/openvpn/auth1.txt".
+9. Repeat step 8 for all openvpn config files and add the path of file containing the credentials, in the line containing "auth-user-pass".
+
+
+1. Edit the nordvpn-checker.cpp file and edit the preprocessor directive "#define TOTAL_SERVERS N", and set the value of N to the number of config files\
+	present in /etc/openvpn/ directory.
+
+
 ### COMPILE ###
 1. Change current working directory to nordvpn-checker directory.\
 	cd ./nordvpn-checker
@@ -19,22 +38,23 @@ Use this only on accounts you own.
 2. Compile the program on you unix System.\
 	g++ ./nordvpn-checker.cpp -o ./nordvpn-checker
 
-3. Make the Script script.sh executable\
-	chmod u+x ./script.sh
+3. Make the Script check_script.sh and switch_script.sh executable\
+	chmod u+x ./check_script.sh \
+	chmod u+x ./switch_script.sh
 
 
 ### USE ###
 1. Run the program.\
-	./nordvpn-checker -i {inputfile_path} -o {outputfile_path}
-
+	./nordvpn-checker -i {inputfile_path} -o {outputfile_path} [-c N]
 
 
 ### INFO ###
 1. This program accepts as input a inputfile_path. File must be a unix text file and not a windows textfile (i.e it must not contain any carriage return characters)
 2. All the entries in inputfile should be of the format: username:password and each seperate entry should be on a newline.
 3. All the Successful Entries along with their Expiry Details will be appended to the file given by outputfile_path as well as written to stdout.
-4. Make sure that nordvpn daemon i.e nordvpnd is already running.
-5. THIS PROGRAM WORKS ONLY ON UNIX LIKE SYSTEMS
+4. It also accepts a -c flag which specifies the number of the current nordvpn server config file being used before nordvpn-checker program is run. By default it assumes that no nordvpn config file is being used.
+5. Make sure that nordvpn daemon i.e nordvpnd is already running.
+6. THIS PROGRAM WORKS ONLY ON UNIX LIKE SYSTEMS
 
 
 ### PROGRAM CONFIGURATION ###
