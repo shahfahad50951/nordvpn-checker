@@ -1,4 +1,4 @@
-# NORDVPN ACCOUNT CHECKER (BASED ON C++ AND BASH) #
+# NORDVPN ACCOUNT CHECKER (BASED ON C++) #
 
 ## IMPORTANT NOTE ##
 This program is for education purposes ONLY.
@@ -18,10 +18,7 @@ Use this only on accounts you own.
 
 2. Compile the program on you unix System.\
 	g++ ./nordvpn-checker.cpp -o ./nordvpn-checker
-
-3. Make the Script script.sh executable\
-	chmod u+x ./script.sh
-
+	
 
 ### USE ###
 1. Run the program.\
@@ -35,6 +32,8 @@ Use this only on accounts you own.
 3. All the Successful Entries along with their Expiry Details will be appended to the file given by outputfile_path as well as written to stdout.
 4. Make sure that nordvpn daemon i.e nordvpnd is already running.
 5. THIS PROGRAM WORKS ONLY ON UNIX LIKE SYSTEMS
+6. This branch uses linux pipes for Interprocess Communication instead of file based IPC, so this program should be faster.
+7. This program does not require bash.
 
 
 ### PROGRAM CONFIGURATION ###
