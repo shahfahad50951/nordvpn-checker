@@ -1,4 +1,4 @@
-# NORDVPN ACCOUNT CHECKER (BASED ON C++ AND BASH) #
+# NORDVPN ACCOUNT CHECKER (BASED ON C++) #
 
 ## IMPORTANT NOTE ##
 This program is for education purposes ONLY.
@@ -27,8 +27,7 @@ Use this only on accounts you own.
 9. Repeat step 8 for all openvpn config files and add the path of file containing the credentials, in the line containing "auth-user-pass".
 
 
-1. Edit the nordvpn-checker.cpp file and edit the preprocessor directive "#define TOTAL_SERVERS N", and set the value of N to the number of config files\
-	present in /etc/openvpn/ directory.
+1. Edit the nordvpn-checker.cpp file and edit the preprocessor directive "#define TOTAL_SERVERS N", and set the value of N to the number of config files present in /etc/openvpn/ directory.
 
 
 ### COMPILE ###
@@ -37,10 +36,6 @@ Use this only on accounts you own.
 
 2. Compile the program on you unix System.\
 	g++ ./nordvpn-checker.cpp -o ./nordvpn-checker
-
-3. Make the Script check_script.sh and switch_script.sh executable\
-	chmod u+x ./check_script.sh \
-	chmod u+x ./switch_script.sh
 
 
 ### USE ###
