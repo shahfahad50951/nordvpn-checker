@@ -53,6 +53,14 @@ int main(int argc, char* argv[])
 			currServerNum = i;
 			nextServerNum = i+1;
 		}
+
+		if(!changeAccount(currServerNum, 0))
+		{
+			cerr << "Failed to Start Openvpn Server Number: " << currServerNum << '\n';
+			return -1;
+		}
+		else
+			cout << "Started Openvpn Server Number: " << currServerNum << '\n';
 	}
 
 	bool checkback{false};
@@ -189,6 +197,12 @@ bool parseArgs(int argc, char *argv[])
         cerr << "[ERROR]: nord-checker: Invalid Flag: " << argv[3] << '\n';
         return false;
     }
+
+    if(argc == 7 && strcmp(argv[5], "-c") != 0 && strcmp(argv[5], "--current") != 0)
+    {
+	    cerr << "[ERROR]: nordvpn-checker: Invalid Flag: " << argv[5] << '\n';
+	    return false;
+    }
 	
     return true;
 
@@ -198,14 +212,10 @@ void parseCombo(const string& combo, string& username, string& password)
 {
     size_t delimPos = combo.find(":");
     username = combo.substr(0, delimPos);
-
-    #ifdef __DEBUG
-        cerr << "[DEBUG]: Username: " << username << '\n';
-    #endif
-
     password = combo.substr(delimPos+1, string::npos);
 
     #ifdef __DEBUG
+        cerr << "[DEBUG]: Username: " << username << '\n';
     	size_t length = strlen(password.c_str());
         cerr << "[DEBUG]: Password: " << password << '\n';
 	cerr << "[DEBUG]: Length of Password: " << length << '\n';
@@ -253,7 +263,8 @@ bool nordvpn_logout(void)
 		}
 	}
 
-	pid_t rpid = wait(nullptr);
+	wait(nullptr);
+
 	return true;
 }
 
@@ -263,10 +274,11 @@ int checkStatus(int rfd)
 	ssize_t count = read(rfd, buffer, BUFLEN-1);
 	buffer[count-1] = '\0';
 
-	string line = buffer;
-        if(line.find("Welcome") != string::npos)
-            return STATUS_SUCCESS;
-	else if(line.find("It's not") != string::npos)
+	if(strstr(buffer, "We couldn't") || strstr(buffer, "Username or"))
+		return STATUS_FAILURE;
+	else if(strstr(buffer, "Welcome"))
+		return STATUS_SUCCESS;
+	else if(strstr(buffer, "It's"))
 		return STATUS_API_REFUSED;
 
     return STATUS_FAILURE;
@@ -425,7 +437,7 @@ bool changeAccount(int nextServerNum, int currServerNum)
 		}
 	}
 
-		pid_t rpid = wait(&status);
+		wait(&status);
 
 		if(!WIFEXITED(status) || (WEXITSTATUS(status) != 0))
 			return false;
