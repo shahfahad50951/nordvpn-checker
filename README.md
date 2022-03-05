@@ -47,7 +47,7 @@ Use this only on accounts you own.
 1. This program accepts as input a inputfile_path. File must be a unix text file and not a windows textfile (i.e it must not contain any carriage return characters)
 2. All the entries in inputfile should be of the format: username:password and each seperate entry should be on a newline.
 3. All the Successful Entries along with their Expiry Details will be appended to the file given by outputfile_path as well as written to stdout.
-4. It also accepts a -c flag which specifies the number of the current nordvpn server config file being used before nordvpn-checker program is run. By default it assumes that no nordvpn config file is being used.
+4. It also accepts a -c flag which specifies the number of the nordvpn openvpn server config file to start, at the beginning of the program automatically. By default, this program does not start any nordvpn openvpn server at the beginning of the program. 
 5. Make sure that nordvpn daemon i.e nordvpnd is already running.
 6. THIS PROGRAM WORKS ONLY ON UNIX LIKE SYSTEMS
 
